@@ -12,3 +12,8 @@ class CorrectManager(object):
     def update_studentanswer(self, path):
         # 更新学生答案路径
         self.student_answer = path
+
+    @staticmethod
+    def __formatstr(self):
+        # 对字符串格式化，如把操作符旁边的空格去掉
+        op = ['+', '-', '*', '/', '**', '=', '>', '<', '>=', '<=', '!=', '+=', 'not', 'and', 'or']
