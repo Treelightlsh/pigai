@@ -1,3 +1,6 @@
+import re
+
+
 # 与正确的Python文件对比，用于批改学生的Python文件
 class CorrectManager(object):
     def __init__(self):
@@ -14,8 +17,10 @@ class CorrectManager(object):
         self.student_answer = path
 
     @staticmethod
-    def __formatstr(self):
+    def __formatstr(string):
         # 字符串格式化
         # if pm > 200     :
-        # 对操作符的两边去掉空格
-        op = ['+', '-', '*', '/', '**', '=', '>', '<', '>=', '<=', '!=', '+=']
+        # 以下操作符的两边去掉空格
+        ops = ['+', '-', '*', '/', '**', '=', '>', '<', '>=', '<=', '!=', '+=', ':', '(', ')']
+        op_str = '|'.join(ops)
+        string = re.sub(r' {0,}(%s) {0,}' % op_str, r'\1', string)
