@@ -1,6 +1,10 @@
 import re
 
 
+def strip_space(match):
+    return match.group().replace(' ', '')
+
+
 # 与正确的Python文件对比，用于批改学生的Python文件
 class CorrectManager(object):
     def __init__(self):
@@ -24,3 +28,6 @@ class CorrectManager(object):
         ops = ['+', '-', '*', '/', '**', '=', '>', '<', '>=', '<=', '!=', '+=', ':', '(', ')']
         op_str = '|'.join(ops)
         string = re.sub(r' {0,}(%s) {0,}' % op_str, r'\1', string)
+        # 待改善的地方：需要判断是不在双引号或单引号中
+        # 去掉字符串中的空格部分
+        string = re.sub(r'(\'|")(.*)\1', strip_space, string)
