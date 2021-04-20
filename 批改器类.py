@@ -46,6 +46,13 @@ class CorrectManager(object):
             print(formatstr(line.strip()))
         f.close()
 
+    def get_valid_lines(self):
+        # 获取文件的有效行数，#开头的行与空行去掉
+        pass
+
+    def com_files_lines(self):
+        pass
+
 
 correctmanager = CorrectManager()
 correctmanager.update_correctanswer('correct_answer.py')
