@@ -1,11 +1,12 @@
 import re
 
 
-def count_valid_statement(filepath):
+def get_py_statements(filepath):
+    # 获取文件的语句列表
     # 获取文件的有效语句数，#开头的行与空行去掉
     # 返回语句数量
     f = open(filepath, encoding='utf-8')
-    statement_count = 0
+    statement_list = []
     for line in f:
         if re.search('^ {0,}#', line):
             # 如果是以#开头，则此行是注释，略过此行
@@ -13,9 +14,9 @@ def count_valid_statement(filepath):
         if re.search('^ {0,}$', line):
             # 如果是空行，则略过
             continue
-        statement_count += 1
+        statement_list.append(formatstr(line))
     f.close()
-    return statement_count
+    return statement_list
 
 
 def formatstr(string):
@@ -40,18 +41,19 @@ def strip_space(match):
 class CorrectManager(object):
     def __init__(self):
         # correct_answer为正确答案，student_answer为学生答案,均为文件路径
-        self.correct_answer = ''
-        self.paper = ''
-        # 获取正确答案语句数
-        self.correct_statement_lines = count_valid_statement(self.correct_answer)
+        self.answer_path = ''
+        self.paper_path = ''
+        self.answer_statement_list = []
 
     def update_correctanswer(self, path):
         # 更新正确答案路径
-        self.correct_answer = path
+        self.answer_path = path
+        # 获取正确答案语句
+        self.answer_statement_list = get_py_statements(self.answer_path)
 
     def update_paper(self, path):
         # 更新学生答案路径
-        self.paper = path
+        self.paper_path = path
 
     @staticmethod
     def split_sentence(string):
@@ -62,15 +64,18 @@ class CorrectManager(object):
         # 比较学生答案与标准答案，判断是否正确，正确返回True，否则返回False
         # 暂时以一行为一个语句比较
         # 首先判断语句数是否一致，不一致则判为程序错误
-        # 获取学生的有效语句数
-        paper_valid_lines = count_valid_statement(self.paper)
-        if paper_valid_lines != self.correct_statement_lines:
+        # 获取学生的有效语句列表
+        paper_statement_list = get_py_statements(self.paper_path)
+        if len(paper_statement_list) != len(self.answer_statement_list):
             # 如果语句数不相同，则返回false
             return False
         else:
             # 逐个语句比较，如果语句均相同，则返回True，否则有一个语句不同，则返回False
             # 注意要判断缩进
-            pass
+            # 读取答案文件
+            f = open(self.correct_answer, encoding='utf-8')
+            temp = f.readlines()
+            f.close()
 
     def com_files_lines(self):
         pass
@@ -80,4 +85,5 @@ class CorrectManager(object):
 # correctmanager.update_correctanswer('correct_answer.py')
 # correctmanager.compare()
 # print(formatstr("if pm > 200:"))
-print(count_valid_statement('correct_answer.py'))
+# print(count_valid_statement('correct_answer.py'))
+print(get_py_statements('correct_answer.py'))
