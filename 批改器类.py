@@ -1,6 +1,23 @@
 import re
 
 
+def count_valid_statement(filepath):
+    # 获取文件的有效语句数，#开头的行与空行去掉
+    # 返回语句数量
+    f = open(filepath, encoding='utf-8')
+    statement_count = 0
+    for line in f:
+        if re.search('^ {0,}#', line):
+            # 如果是以#开头，则此行是注释，略过此行
+            continue
+        if re.search('^ {0,}$', line):
+            # 如果是空行，则略过
+            continue
+        statement_count += 1
+    f.close()
+    return statement_count
+
+
 def formatstr(string):
     # 字符串格式化
     # if pm > 200     :
@@ -15,6 +32,7 @@ def formatstr(string):
 
 
 def strip_space(match):
+    # 正则表达式中匹配到的字符串中的空格去掉
     return match.group().replace(' ', '')
 
 
@@ -23,15 +41,17 @@ class CorrectManager(object):
     def __init__(self):
         # correct_answer为正确答案，student_answer为学生答案,均为文件路径
         self.correct_answer = ''
-        self.student_answer = ''
+        self.paper = ''
+        # 获取正确答案语句数
+        self.correct_statement_lines = count_valid_statement(self.correct_answer)
 
     def update_correctanswer(self, path):
         # 更新正确答案路径
         self.correct_answer = path
 
-    def update_studentanswer(self, path):
+    def update_paper(self, path):
         # 更新学生答案路径
-        self.student_answer = path
+        self.paper = path
 
     @staticmethod
     def split_sentence(string):
@@ -39,22 +59,25 @@ class CorrectManager(object):
         pass
 
     def compare(self):
-        # 比较学生答案与标准答案，判断是否正确
+        # 比较学生答案与标准答案，判断是否正确，正确返回True，否则返回False
         # 暂时以一行为一个语句比较
-        f = open(self.correct_answer, encoding='utf-8')
-        for line in f:
-            print(formatstr(line.strip()))
-        f.close()
-
-    def get_valid_lines(self):
-        # 获取文件的有效行数，#开头的行与空行去掉
-        pass
+        # 首先判断语句数是否一致，不一致则判为程序错误
+        # 获取学生的有效语句数
+        paper_valid_lines = count_valid_statement(self.paper)
+        if paper_valid_lines != self.correct_statement_lines:
+            # 如果语句数不相同，则返回false
+            return False
+        else:
+            # 逐个语句比较，如果语句均相同，则返回True，否则有一个语句不同，则返回False
+            # 注意要判断缩进
+            pass
 
     def com_files_lines(self):
         pass
 
 
-correctmanager = CorrectManager()
-correctmanager.update_correctanswer('correct_answer.py')
-correctmanager.compare()
+# correctmanager = CorrectManager()
+# correctmanager.update_correctanswer('correct_answer.py')
+# correctmanager.compare()
 # print(formatstr("if pm > 200:"))
+print(count_valid_statement('correct_answer.py'))
