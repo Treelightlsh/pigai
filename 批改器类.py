@@ -14,6 +14,9 @@ def get_py_statements(filepath):
         if re.search('^ {0,}$', line):
             # 如果是空行，则略过
             continue
+        if re.search(': {0,}\n$', line):
+            # 处理以:结束，即下一个语句是需要缩进的
+            pass
         statement_list.append(formatstr(line))
     f.close()
     return statement_list
@@ -45,7 +48,7 @@ class CorrectManager(object):
         self.paper_path = ''
         self.answer_statement_list = []
 
-    def update_correctanswer(self, path):
+    def update_answer(self, path):
         # 更新正确答案路径
         self.answer_path = path
         # 获取正确答案语句
@@ -73,9 +76,7 @@ class CorrectManager(object):
             # 逐个语句比较，如果语句均相同，则返回True，否则有一个语句不同，则返回False
             # 注意要判断缩进
             # 读取答案文件
-            f = open(self.correct_answer, encoding='utf-8')
-            temp = f.readlines()
-            f.close()
+            pass
 
     def com_files_lines(self):
         pass
