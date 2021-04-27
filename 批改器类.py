@@ -6,7 +6,14 @@ def get_py_statements(filepath):
     # 获取文件的有效语句数，#开头的行与空行去掉
     # 返回语句数量
     f = open(filepath, encoding='utf-8')
+    # 记录有效的语句数
     statement_list = []
+    # 记录有效语句
+    statement_no = 0
+    # 缩进层级对应的语句
+    indent_to_statement = {}
+    # 存放按缩进空格数排序的语句
+    indent_to_statement_list = []
     for line in f:
         if re.search('^ {0,}#', line):
             # 如果是以#开头，则此行是注释，略过此行
@@ -14,10 +21,21 @@ def get_py_statements(filepath):
         if re.search('^ {0,}$', line):
             # 如果是空行，则略过
             continue
-        if re.search(': {0,}\n$', line):
-            # 处理以:结束，即下一个语句是需要缩进的
-            pass
+        # 获取每行开头的缩进空格数，先用正则匹配从开头到第一个非空字符，然后计算空格个数
+        statement_no += 1
+        start_space_count = re.search('^ {0,}\S', line).group().count(' ')
+        if start_space_count not in indent_to_statement.keys():
+            # 如果之前没有添加此缩进层级，则需要创建
+            indent_to_statement[start_space_count] = [statement_no, ]
+        else:
+            # 已经添加过此层级缩进
+            indent_to_statement[start_space_count].append(statement_no)
         statement_list.append(formatstr(line))
+    # 根据key的值进行排序
+    new_key_list = sorted(indent_to_statement.keys())
+    # 按照key的值按顺序放进列表中
+    for key in new_key_list:
+        indent_to_statement_list.append(indent_to_statement[key])
     f.close()
     return statement_list
 
@@ -26,7 +44,8 @@ def formatstr(string):
     # 字符串格式化
     # if pm > 200     :
     # 以下操作符的两边去掉空格
-    ops = ['\+', '-', '\*', '/', '\*\*', '=', '>', '<', '>=', '<=', '!=', '\+=', ':', '\(', '\)']
+    ops = ['\+', '-', '\*', '/', '\*\*', '=', '>', '<', '>=', '<=', '!=', '\+=', ':', '\(', '\)',
+           '\[', '\]']
     op_str = '|'.join(ops)
     string = re.sub(r' {0,}(%s) {0,}' % op_str, r'\1', string)
     # 待改善的地方：需要判断是不在双引号或单引号中
