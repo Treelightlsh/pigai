@@ -1,4 +1,5 @@
 import re
+import os
 
 
 def get_py_statements(filepath):
@@ -37,7 +38,7 @@ def get_py_statements(filepath):
     for key in new_key_list:
         indent_to_statement_list.append(indent_to_statement[key])
     f.close()
-    return statement_list
+    return statement_list, indent_to_statement_list
 
 
 def formatstr(string):
@@ -50,7 +51,7 @@ def formatstr(string):
     string = re.sub(r' {0,}(%s) {0,}' % op_str, r'\1', string)
     # 待改善的地方：需要判断是不在双引号或单引号中
     # 去掉字符串中的空格部分
-    string = re.sub(r'(\'|")(.*)\1', strip_space, string)
+    string = re.sub(r'(\'|")(.*)\1', strip_space, string).strip()
     return string
 
 
@@ -65,13 +66,13 @@ class CorrectManager(object):
         # correct_answer为正确答案，student_answer为学生答案,均为文件路径
         self.answer_path = ''
         self.paper_path = ''
-        self.answer_statement_list = []
+        self.answer_statement_info = None
 
     def update_answer(self, path):
         # 更新正确答案路径
         self.answer_path = path
         # 获取正确答案语句
-        self.answer_statement_list = get_py_statements(self.answer_path)
+        self.answer_statement_info = get_py_statements(self.answer_path)
 
     def update_paper(self, path):
         # 更新学生答案路径
@@ -83,27 +84,20 @@ class CorrectManager(object):
         pass
 
     def compare(self):
-        # 比较学生答案与标准答案，判断是否正确，正确返回True，否则返回False
-        # 暂时以一行为一个语句比较
-        # 首先判断语句数是否一致，不一致则判为程序错误
-        # 获取学生的有效语句列表
-        paper_statement_list = get_py_statements(self.paper_path)
-        if len(paper_statement_list) != len(self.answer_statement_list):
-            # 如果语句数不相同，则返回false
+        # 比较两个文件，如果不同则返回False，否则返回True
+        if self.answer_statement_info != get_py_statements(self.paper_path):
             return False
         else:
-            # 逐个语句比较，如果语句均相同，则返回True，否则有一个语句不同，则返回False
-            # 注意要判断缩进
-            # 读取答案文件
-            pass
+            return True
 
     def com_files_lines(self):
         pass
 
 
-# correctmanager = CorrectManager()
-# correctmanager.update_correctanswer('correct_answer.py')
-# correctmanager.compare()
-# print(formatstr("if pm > 200:"))
-# print(count_valid_statement('correct_answer.py'))
-print(get_py_statements('correct_answer.py'))
+correctmanager = CorrectManager()
+correctmanager.update_answer('answer.py')
+for root, dirs, files in os.walk('paper'):
+    for file in files:
+        if re.search('.py$', file):
+            correctmanager.update_paper(os.path.join(root, file))
+print(correctmanager.compare())
